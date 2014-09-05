@@ -1,0 +1,100 @@
+---
+title: "R for beginners"
+author: "Alexander Matrunich"
+date: "08/23/2014"
+output: html_document
+---
+
+We continue our example with Hello world, and now we will salute not world in general, but create greetings with the most popular names in US. To complete the task we will learn how to install and load packages in R, how to deal with data frames and how to get basic statistics about a data set.
+
+## R: core and packages 
+
+R software is not a monolithic structure, it’s very flexible. Except very beginners, there are no two R users who have identical installations of R. R consists from a core which holds basic functions and from stand-alone packages. When you download R distribution from CRAN you get the core and a bunch of base packages. Usually this basic functionality will not be enough for your specific tasks and you will want to add some additional packages. In November of 2013 there were more than 5000 packages on CRAN, 700 on BioConductor and unknown number of packages at GitHub.
+
+You can install new package with next command. 
+
+```{r install_lib, eval=FALSE}
+install.library("babynames")
+```
+
+Depending on your operating system you will get specific output about results of installation. The package will be installed in user directory and will be available only for you. If you want the package to be available for all users of the computer you have to start R-session with root/administrative privileges and install it with install.library() function. In this case the package will be placed in system directory.
+
+So here we installed the package named "babynames". A package can consist of functions and/or data. The package "babynames" consists of data sets only: it contains US baby names of 1880-2013 with at least 5 uses. Let's look inside.
+
+To use content of a package during R-session we have to tell R about this.
+
+```{r attach_lib}
+library("babynames")
+```
+
+After execution of this command R will know that it should look for names of functions or data sets not only inside of R core and base packages but also in library "babynames".
+
+## Discovering the data set
+
+```{r dim_data}
+# Number of rows and columns of the data set
+dim(babynames)
+```
+Wow! It is a huge data set! It has `r dim(babynames)[1]` rows! And I'm afraid it's not possible to put this table into Excel spreadsheet. Sorry about it!
+
+```{r head_data}
+# First six rows of the data set
+head(babynames)
+```
+
+Let's find the most popular name. I'm asking R to output row where n is maximum.
+
+```{r max_n}
+babynames[babynames$n == max(babynames$n),] 
+```
+OK, it was Linda in 1947. Let's dig into the command I used. Here we deal with several R-instruments. Dollar sign, square brackets, logical operators and function max().
+
+Dollar sign is used when you want to access an object inside of another object. We have data.frame babynames that consists of 5 columns (vectors). And I use babynames$n to return column n from babynames data set.
+
+Also I put this vector in function max(), that return the maximum element. Construction babynames$n == max(babynames$n) returns information what elements of vector babynames$n are maximum. Equal sign in R is doubled to avoid confusing with assign operator (x = 5 means 'let x equals 5' and x == 5 means 'is x equal 5').
+
+Square brackets are a brother of dollar sign: they also allow user to extract parts of object. babynames[A, B] means 'please return from data set babynames rows which equal A, and columns which equal B'. So I asked R to return from babynames data set rows where n is maximum, and all columns.
+
+Ups, I found a mistake in my thinking! In 1947 there were `r babynames$n[babynames$n == max(babynames$n)]` children named Linda. And the number is maximum in the data set. But it doesn't mean Linda was the most popular name because the total number of children per year differs. We should look at prop column which indicates proportional share of name in that year.
+
+```{r max_prop}
+babynames[babynames$prop == max(babynames$prop),]
+```
+
+OK, it's John from 1880. 8% of children born in 1880 got name John.
+
+Let's expand our task and print Hello to the most popular names of girls born from 1903 till 1911. I'll show you more advanced approach with using of a fresh package for data manipulation. It's called dplyr, that stands for "Data.frame's apPLY in R", where apply means to apply different functions.
+
+
+```{r install_dplyr, eval=FALSE}
+install.library("dplyr") # You already know what does it mean
+```
+
+```{r attach_dplyr, message=FALSE}
+library("dplyr")
+```
+
+I divide our task in two steps. Firstly we get the names and put them into a variable, secondly we print the desired strings.
+
+```{r selecting_names}
+girls_names <- babynames %>%   # We work with babynames data.frame
+                               # and put results into girls_names
+  filter(year %in% 1903:1911 & # Filtering babynames by years
+           sex == 'F') %>%     # and by gender
+  group_by(year) %>%           # We want results per each year
+  filter(prop == max(prop))    # We keep rows with max value of prop
+```
+
+OK, we've got the most popular girls' names from 1903-1911, now let's salute them.
+
+```{r print_names}
+paste("Hello ", girls_names$name, "!", sep = "")
+```
+
+Mary in all cases?! Let's check our data.frame:
+
+```{r print_df}
+girls_names
+```
+
+Yes, it seems like Mary was the most popular girl name in US in the beginning of XXth century.
