@@ -5,57 +5,97 @@ date: "08/23/2014"
 output: html_document
 ---
 
-We continue our example with Hello world, and now we will salute not world in general, but create greetings with the most popular names in US. To complete the task we will learn how to install and load packages in R, how to deal with data frames and how to get basic statistics about a data set.
+We continue on from our Hello world example, now we will not salute the world in
+general, but create greetings from the most popular names in US. To complete the task we will learn how to install and load packages in R, how to deal with data frames and how to get basic statistics about a data set.
 
 ## R: core and packages 
 
-R software is not a monolithic structure, it’s very flexible. Except very beginners, there are no two R users who have identical installations of R. R consists from a core which holds basic functions and from stand-alone packages. When you download R distribution from CRAN you get the core and a bunch of base packages. Usually this basic functionality will not be enough for your specific tasks and you will want to add some additional packages. In November of 2013 there were more than 5000 packages on CRAN, 700 on BioConductor and unknown number of packages at GitHub.
+R software is not a monolithic structure, it’s very flexible. Except for
+beginners, there are no two R users who have identical installations of R. R
+consists of a core which holds basic functions, and additional stand-alone
+packages. When you download a R distribution from CRAN you get the core and a
+bunch of base packages. Usually this basic functionality will not be enough for
+your specific tasks and you will want to add some additional packages. As of November 2013 there were more than 5000 packages on CRAN, 700 on BioConductor and unknown number of packages at GitHub.
 
-You can install new package with next command. 
+You can install the new package called "babynames" with the next command. 
 
 ```{r install_lib, eval=FALSE}
-install.library("babynames")
+install.packages("babynames")
 ```
 
-Depending on your operating system you will get specific output about results of installation. The package will be installed in user directory and will be available only for you. If you want the package to be available for all users of the computer you have to start R-session with root/administrative privileges and install it with install.library() function. In this case the package will be placed in system directory.
+Depending on which operating system you are using, you will get specific output
+about results of the installation. The package will be installed in your user
+directory and will be available only for you. If you want the package to be
+available for all users of the computer you have to start R-session with
+root/administrative privileges and install it with the install.packages()
+function. In this case the package will be placed in system directory and will
+be available to all users.
 
-So here we installed the package named "babynames". A package can consist of functions and/or data. The package "babynames" consists of data sets only: it contains US baby names of 1880-2013 with at least 5 uses. Let's look inside.
+So here we have installed the package named "babynames". A package consists of
+functions and/or data. The particular package "babynames" consists of data sets
+only: USA baby names that have been used at least five times per year, from
+years 1880 to 2013. Let's look inside.
 
-To use content of a package during R-session we have to tell R about this.
+We've installed a package however to use a package during R-session we have to
+tell R about this and "load" the package.
 
 ```{r attach_lib}
 library("babynames")
 ```
 
-After execution of this command R will know that it should look for names of functions or data sets not only inside of R core and base packages but also in library "babynames".
+After execution of this command R will know that it should look for names of
+functions or data sets, inside R core and base packages and also the library "babynames".
 
 ## Discovering the data set
+
+Let's look at the size of the babynames data set.
 
 ```{r dim_data}
 # Number of rows and columns of the data set
 dim(babynames)
 ```
-Wow! It is a huge data set! It has `r dim(babynames)[1]` rows! And I'm afraid it's not possible to put this table into Excel spreadsheet. Sorry about it!
+Wow! It is a huge data set! It has `r dim(babynames)[1]` rows! I'm afraid it's
+not possible to put this table into an Excel spreadsheet. Sorry about it!
+
+Let's look at the top of the dataset with the headings so we get an idea of what
+data is actually in the data set.
 
 ```{r head_data}
 # First six rows of the data set
 head(babynames)
 ```
 
-Let's find the most popular name. I'm asking R to output row where n is maximum.
+Let's find the most popular name. I'm asking R to output the row where "n"
+(number) is the maximum.
 
 ```{r max_n}
 babynames[babynames$n == max(babynames$n),] 
 ```
-OK, it was Linda in 1947. Let's dig into the command I used. Here we deal with several R-instruments. Dollar sign, square brackets, logical operators and function max().
+OK, it was "Linda" in the year 1947. Let's dig into the command I used. Here we
+deal with several R-instruments. Dollar sign ($), square brackets([]), logical
+operators and a function (max()).
 
-Dollar sign is used when you want to access an object inside of another object. We have data.frame babynames that consists of 5 columns (vectors). And I use babynames$n to return column n from babynames data set.
+The dollar sign is used when you want to access an object inside of another
+object. The data.frame babynames consists of 5 columns (vectors) of numbers. I
+use babynames$n to return column n from babynames data set as a vector.
 
-Also I put this vector in function max(), that return the maximum element. Construction babynames$n == max(babynames$n) returns information what elements of vector babynames$n are maximum. Equal sign in R is doubled to avoid confusing with assign operator (x = 5 means 'let x equals 5' and x == 5 means 'is x equal 5').
+Then I put this vector of numbers into function max(), which will return the
+element of that vector that is largest. The construction babynames\$n ==
+max(babynames$n) returns information about which element(s) of the vector
+babynames\$n are maximum. The equal sign is doubled to avoid confusion with the
+assign operator.  x = 5 means 'assign the value of 5 to the variable x' while x
+== 5 means 'check and see if the value contained in variable x is exactly 5'.
 
-Square brackets are a brother of dollar sign: they also allow user to extract parts of object. babynames[A, B] means 'please return from data set babynames rows which equal A, and columns which equal B'. So I asked R to return from babynames data set rows where n is maximum, and all columns.
+Square brackets are a brother of the dollar sign: they also allow user to
+extract specific parts of object. babynames[A, B] means 'please return from data
+set babynames, rows which equal A, and columns which equal B'. So here I asked R
+to return from babynames data set, rows where n is the maximum, and all the columns
+where the vale of n is the maximum.
 
-Ups, I found a mistake in my thinking! In 1947 there were `r babynames$n[babynames$n == max(babynames$n)]` children named Linda. And the number is maximum in the data set. But it doesn't mean Linda was the most popular name because the total number of children per year differs. We should look at prop column which indicates proportional share of name in that year.
+Ooops, error in my logic! In 1947 there were `r babynames$n[babynames$n == max(babynames$n)]` children named Linda.  The number is the maximum in the data set. However it doesn't mean that Linda was the most
+popular name because the total number of children per year differs. We should
+look at prop (proportion) column which indicates proportional share of children
+given that name in that year.
 
 ```{r max_prop}
 babynames[babynames$prop == max(babynames$prop),]
@@ -63,18 +103,20 @@ babynames[babynames$prop == max(babynames$prop),]
 
 OK, it's John from 1880. 8% of children born in 1880 got name John.
 
-Let's expand our task and print Hello to the most popular names of girls born from 1903 till 1911. I'll show you more advanced approach with using of a fresh package for data manipulation. It's called dplyr, that stands for "Data.frame's apPLY in R", where apply means to apply different functions.
+Let's expand our task and print Hello to the most popular names of girls born
+from 1903 untill 1911. I'll show you more advanced approach with using of
+another package used for data manipulation. It's called dplyr, that stands for "Data.frame's apPLY in R", where apply means to apply different functions.
 
 
 ```{r install_dplyr, eval=FALSE}
-install.library("dplyr") # You already know what does it mean
+install.packages("dplyr") # You already know what does it mean
 ```
 
 ```{r attach_dplyr, message=FALSE}
 library("dplyr")
 ```
 
-I divide our task in two steps. Firstly we get the names and put them into a variable, secondly we print the desired strings.
+I divide our task in two steps. First we get the names and put them into a variable, secondly we print the desired strings.
 
 ```{r selecting_names}
 girls_names <- babynames %>%   # We work with babynames data.frame
@@ -85,7 +127,7 @@ girls_names <- babynames %>%   # We work with babynames data.frame
   filter(prop == max(prop))    # We keep rows with max value of prop
 ```
 
-OK, we've got the most popular girls' names from 1903-1911, now let's salute them.
+OK, we've got the most popular girls' names from 1903 to 1911, now let's salute them.
 
 ```{r print_names}
 paste("Hello ", girls_names$name, "!", sep = "")
@@ -97,4 +139,4 @@ Mary in all cases?! Let's check our data.frame:
 girls_names
 ```
 
-Yes, it seems like Mary was the most popular girl name in US in the beginning of XXth century.
+Yes, it seems like Mary was the most popular girl name in USA in the beginning of XXth century.
